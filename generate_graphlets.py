@@ -8,12 +8,24 @@ import numpy as np
 import itertools as it
 import time
 
-def generate_graphlets(n,x = [-1,0,1,2]):
-    """Generate all n-graphlets"""    
-    # Vector x corresponds to possible edge labels 
+def generate_graphlets(n, gtype = 'undirected'):
+    """Generate all 2- to n-nodes graphlets"""    
+    # n     - number maximal of nodes to consider
+    # gtype  - type of graphlet ('undirected','directed', or 'mixed')
+    
+    if ( gtype == 'undirected' ):
+        x = [0, 2];
+    elif ( gtype == 'directed' ):
+        x = [-1, 0, 1];
+    elif ( gtype == 'mixed' ):
+        x = [-1, 0, 1, 2];
+    else:
+        raise NameError("The type of graphlet should be 'undirected', 'directed', or 'mixed'.");
+    
     adj = []; orb = [];
+    
     if (n == 2):
-        # Base case for 2-graphlets
+        # Base case for 2-nodes graphlets
         if (x == [-1,0,1,2]):
             adj.append(np.array([[0, 2],[2,0]]));
             adj.append(np.array([[0, 1],[-1,0]]));
@@ -27,15 +39,10 @@ def generate_graphlets(n,x = [-1,0,1,2]):
         elif (x == [0,2]):
             adj.append(np.array([[0, 2],[2,0]]));
             orb.append([set([0,1])]);
-            graphlets = [[adj,orb]];
-        else: 
-            print "Error the vector x takes only three values:"
-            print "         - [0,2] for undirected networks"
-            print "         - [-1,0,1] for directed networks"
-            print "         - [-1,0,1,2] for mixed networks"
-            return -1;
+            graphlets = [[adj,orb]];            
     else:
-        graphlets = generate_graphlets(n-1,x);
+        # General case for n-nodes graphlets
+        graphlets = generate_graphlets(n-1,gtype);
         temp = graphlets[-1]; temp = temp[0];
         for i in range(0,len(temp)):
             M = temp[i];
@@ -45,10 +52,10 @@ def generate_graphlets(n,x = [-1,0,1,2]):
                 r = np.reshape(j,(1,n-1)); 
                 if np.any(r):                
                     adj.append(form_matrix(M,r));
-        print "Almost there..."
         graphlets.append(redundantNorbits(adj,n));
     return graphlets;
 
+##########################################################################
 ######################## Secondary functions #############################
     
 def form_matrix(M,r):
@@ -59,6 +66,8 @@ def form_matrix(M,r):
     c[r == 1] = -1; c[r == -1] = 1;
     M = np.concatenate((c.T,M),axis=1);
     return np.concatenate((np.insert(r,0,0,axis=1),M),axis=0);
+    
+#########################################################################  
     
 def redundantNorbits(adj,n):
     "Remove isomorphic graphlets and store orbits"
@@ -115,7 +124,7 @@ def redundantNorbits(adj,n):
         
         
         if (len(adj) == 0):
-            # Termiates if A was the last graphlet
+            # Terminates if A was the last graphlet
             return [adj_clean,orb]   
             
         # Check if any permutations is identical to one of the graphlets with
