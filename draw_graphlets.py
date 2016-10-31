@@ -19,6 +19,7 @@ def draw_graphlets(graphlets,name):
     # name       - name of the pdf file where the graphlet figure are to be saved
     
     n = len(graphlets); 
+    orbit_counter = 1; # To numerote orbits in the representation
     #   Open pdf page
     pdf = matplotlib.backends.backend_pdf.PdfPages(name+".pdf")
       
@@ -30,18 +31,19 @@ def draw_graphlets(graphlets,name):
             A = adj[j];
             orbits = graphlets[i][1][j];
             # Drawing a graphlet and saving it to the file
-            draw_graph_from_adj(A,orbits);
+            orbit_counter = draw_graph_from_adj(A,orbits,orbit_counter);
             pdf.savefig(plt.gcf(),bbox_inches='tight')
             plt.clf()
             print "Time elapsed: " + str(time.time() - t);
     plt.close()        
     pdf.close()
+    return orbit_counter
 
 ##########################################################################
 ######################### Secondary functions ############################
 ##########################################################################
 
-def draw_graph_from_adj(A,orb,dist=5):
+def draw_graph_from_adj(A,orb,orbit_counter,dist=5):
     """Draw the graphlet given by adjacency matrix A and orbit orb with distance
       dist between the node"""
     # A    - adjacency matrix of the graphlet
@@ -68,10 +70,17 @@ def draw_graph_from_adj(A,orb,dist=5):
     
     # Step 3: plot all the nodes with color corresponding to their orbit
     ax = plt.axes()
-    for i in range(0,n):
-        for j in range(0,m):
+    for j in range(0,m):
+        for i in range(0,n):
             if i in orb[j]:            
-                plt.gca().add_patch(plt.Circle(nodes[i] , radius, fc=colors[j]))
+                plt.gca().add_patch(plt.Circle(nodes[i] , 
+                                    radius, 
+                                    fc=colors[j]));
+                ax.annotate(str(orbit_counter), xy=nodes[i], xycoords="data",
+                  va="center", ha="center",
+                  bbox=dict(boxstyle="round", fc=colors[j], ec="none",));
+                
+        orbit_counter += 1;
 
     # Step 4: Draw the edges depending on value in adjacency matrix
     for i in range(0,n-1):
@@ -85,6 +94,7 @@ def draw_graph_from_adj(A,orb,dist=5):
             yi = nodes[i][1]; yj = nodes[j][1];
             nv = math.sqrt((xi-xj)**2 + (yi-yj)**2); 
             vx = radius*(xi-xj)/nv; vy = radius*(yi-yj)/nv;
+            
             
             if (temp == 2):
                 pad = 0.1;
@@ -114,6 +124,7 @@ def draw_graph_from_adj(A,orb,dist=5):
 
     plt.axis('scaled')
     plt.axis('off')
+    return orbit_counter
     
 ##########################################################################
 
