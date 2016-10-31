@@ -8,7 +8,7 @@ import numpy as np
 import itertools as it
 import time
 
-def generate_graphlets_bis(n, gtype = 'undirected'):
+def generate_graphlets(n, gtype = 'undirected'):
     """Generate all 2- to n-nodes graphlets"""    
     # n     - number maximal of nodes to consider
     # gtype  - type of graphlet ('undirected','directed', or 'mixed')
@@ -45,7 +45,7 @@ def generate_graphlets_bis(n, gtype = 'undirected'):
             graphlets = [[adj,orb,[]]];            
     else:
         # General case for n-nodes graphlets
-        graphlets = generate_graphlets_bis(n-1,gtype);
+        graphlets = generate_graphlets(n-1,gtype);
         temp = graphlets[-1]; temp = temp[0];
         for i in range(0,len(temp)):
             M = temp[i];
@@ -56,7 +56,7 @@ def generate_graphlets_bis(n, gtype = 'undirected'):
                 if np.any(r):                
                     adj.append(form_matrix(M,r));
                     origin.append([i,r]);
-        intermediary = redundantNorbits_bis(adj,n,origin);
+        intermediary = redundantNorbits(adj,n,origin);
         graphlets.append(intermediary);
     return graphlets;
 
@@ -74,7 +74,7 @@ def form_matrix(M,r):
     
 #########################################################################  
     
-def redundantNorbits_bis(adj,n,origin):
+def redundantNorbits(adj,n,origin):
     "Remove isomorphic graphlets and store orbits"
     orb = []; adj_clean = []; origin_clean = [];
     
