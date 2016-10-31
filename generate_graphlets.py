@@ -8,7 +8,7 @@ import numpy as np
 import itertools as it
 import time
 
-def generate_graphlets(n, gtype = 'undirected'):
+def generate_graphlets_bis(n, gtype = 'undirected'):
     """Generate all 2- to n-nodes graphlets"""    
     # n     - number maximal of nodes to consider
     # gtype  - type of graphlet ('undirected','directed', or 'mixed')
@@ -23,7 +23,10 @@ def generate_graphlets(n, gtype = 'undirected'):
         raise NameError("The type of graphlet should be 'undirected', 'directed', or 'mixed'.");
     
     adj = []; orb = [];
-    
+    # List holding the (n-1)-nodes graphlet(s) and connections used to generate
+    # the corresponding n-nodes graphlet in adj    
+    origin = [];
+     
     if (n == 2):
         # Base case for 2-nodes graphlets
         if (x == [-1,0,1,2]):
@@ -31,18 +34,18 @@ def generate_graphlets(n, gtype = 'undirected'):
             adj.append(np.array([[0, 1],[-1,0]]));
             orb.append([set([0,1])]);
             orb.append([set([0]),set([1])]);
-            graphlets = [[adj,orb]];
+            graphlets = [[adj,orb,[]]];
         elif (x == [-1,0,1]):
             adj.append(np.array([[0, 1],[-1,0]]));
             orb.append([set([0]),set([1])]);
-            graphlets = [[adj,orb]];
+            graphlets = [[adj,orb,[]]];
         elif (x == [0,2]):
             adj.append(np.array([[0, 2],[2,0]]));
             orb.append([set([0,1])]);
-            graphlets = [[adj,orb]];            
+            graphlets = [[adj,orb,[]]];            
     else:
         # General case for n-nodes graphlets
-        graphlets = generate_graphlets(n-1,gtype);
+        graphlets = generate_graphlets_bis(n-1,gtype);
         temp = graphlets[-1]; temp = temp[0];
         for i in range(0,len(temp)):
             M = temp[i];
@@ -52,7 +55,9 @@ def generate_graphlets(n, gtype = 'undirected'):
                 r = np.reshape(j,(1,n-1)); 
                 if np.any(r):                
                     adj.append(form_matrix(M,r));
-        graphlets.append(redundantNorbits(adj,n));
+                    origin.append([i,r]);
+        intermediary = redundantNorbits_bis(adj,n,origin);
+        graphlets.append(intermediary);
     return graphlets;
 
 ##########################################################################
@@ -69,9 +74,9 @@ def form_matrix(M,r):
     
 #########################################################################  
     
-def redundantNorbits(adj,n):
+def redundantNorbits_bis(adj,n,origin):
     "Remove isomorphic graphlets and store orbits"
-    orb = []; adj_clean = [];
+    orb = []; adj_clean = []; origin_clean = [];
     
     # Generate all permutations except the identity
     perm = [p for p in it.permutations(range(0,n)) if p != tuple(range(0,n))];
@@ -86,8 +91,8 @@ def redundantNorbits(adj,n):
     while len(adj)>0:
         print "Elements left: " + str(len(adj))
         # Take the first graphlet of the list
-        A = adj[0]; c = count[0];
-        del adj[0]; del count[0];
+        A = adj[0]; c = count[0]; origin_clean.append([origin[0]]);
+        del adj[0]; del count[0]; del origin[0];
         adj_clean.append(A); 
         # Generate all permutations of A
         permA = []; 
@@ -121,11 +126,9 @@ def redundantNorbits(adj,n):
         # to the matrix representation of each graphlet (one list for each). 
         orb.append(orbit);            
         
-        
-        
         if (len(adj) == 0):
             # Terminates if A was the last graphlet
-            return [adj_clean,orb]   
+            return [adj_clean,orb,origin_clean]   
             
         # Check if any permutations is identical to one of the graphlets with
         # the distribution of edges (isomorphic graphlets)
@@ -142,7 +145,8 @@ def redundantNorbits(adj,n):
                     
         for i in sorted(ind2remove, reverse=True): 
             del adj[i]; del count[i];
-    
+            origin_clean[-1].append(origin[i]); del origin[i];
+        
         print "Time elapsed :" + str(time.time()-t)        
         
-    return [adj_clean,orb]    
+    return [adj_clean,orb,origin_clean]  
