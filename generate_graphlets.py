@@ -8,6 +8,7 @@ import numpy as np
 import itertools as it
 import time
 
+
 def generate_graphlets(n, gtype = 'undirected'):
     """Generate all 2- to n-nodes graphlets"""    
     # n     - number maximal of nodes to consider
