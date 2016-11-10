@@ -22,27 +22,31 @@ class graphlet:
         
         
 
-def graphlet_track(n,gtype = "mixed"):
+def graphlet_track(n,gtype = "labeled mixed"):
     """Funtion return a structure giving which k-nodes graphlets you can get 
        from a given (k-1)-nodes graphlet and how"""
     track = []; # List of dictionaries   
+    post = init_list_of_objects(15);
     k = 0;
     # Step 1: generate the graphlets
     graphlets = generate_graphlets(n,gtype);
     for i in range(0,len(graphlets)):
-        temp = graphlets[i]; 
+        temp = graphlets[i];
         adj = temp[0]; orb = temp[1]; origin = temp[2];
         if i == 0:
-            ll = 0;
+            l = 0;
         else:
-            ll = len(graphlets[i-1][0]);
+            if i == 1:
+                l = 2;
+            else:
+                l = 15;
         for j in range(0,len(adj)):
             orbit = np.zeros(i+2);
             for sset in orb[j]:
                 for jj in sset:
-                    orbit[jj] = k;
+                    orbit[jj] = int(k);
                 k += 1;
-            track.append(graphlet(j+ll,i+2,adj[j],orbit,[]));
+            track.append(graphlet(j+l,i+2,adj[j],orbit,[]));
             if origin:
                 cur = origin[j];
                 if i == 1:
@@ -51,37 +55,81 @@ def graphlet_track(n,gtype = "mixed"):
                     ll = len(graphlets[i-2][0]);                
                 for ii in range(0,len(cur)):
                     curr = cur[ii];
-                    track[curr[0]+ll].add_posterior([curr[1],j]);
-                        
+                    post[curr[0]+ll].append([curr[1],j+l]);
+    for j in range(0,15):
+        p = post[j];
+        for i in range(0,len(p)):
+            arr = p[i][0]; graph = p[i][1];
+            cg = track[j]; orb = cg.orbit;
+            transf = [];  
+            for ii in range(0,len(arr[0])):
+                k = arr[0][ii];
+                if (k == 2):
+                    connected_orb = (0,int(orb[ii]),0);
+                    transf.append(connected_orb);
+                elif (k == -1):
+                    connected_orb = (1,int(orb[ii]),2);
+                    transf.append(connected_orb);
+                elif (k == 1):
+                    connected_orb = (1,int(orb[ii]),1);
+                    transf.append(connected_orb);
+            transf.append(graph);
+            post_c = cg.posteriors; boo = 0;
+            if post_c:
+                for kk in range(0,len(post_c)):
+                    for b in range(0,len(transf)):
+                        if (len(transf) == len(post_c[kk])) and (boo == 0):
+                            if transf[b] not in post_c[kk]:
+                                boo = 0;
+                                break;
+                            else:
+                                boo = 1;
+                        if boo == 1:
+                            break;
+                    if boo == 1:
+                        break;
+                if boo == 0:
+                    cg.add_posterior(transf);
+            else:
+                cg.add_posterior(transf);
+#                    
+                  
     return track;
-        
-#T = graphlet_track(4);
-f = open("graphlets.txt","w");
-for i in range(0,len(T)):
-    f.write("{ \n");
-    f.write("#Graphlet ID:\n")
-    f.write(str(T[i].id)+"\n");
-    f.write("#Graphlet Number of node:\n")
-    f.write(str(T[i].num_node)+"\n");
-    f.write("#Graphlet Orbit:\n")
-    temp = T[i].orbit;
-    for j in temp:
-        f.write(str(int(j))+ " ");
-    f.write("\n");    
-    f.write("#Graphlet Adjacency Matrix:\n")
-    temp = T[i].adj;
-    f.write(str(len(temp))+" " +str(len(temp[0]))+"\n");
-    for k in range(0,len(temp)):
-        for j in range(0,len(temp[k])):
-            f.write(str(temp[k][j]) + " ");
-        f.write("\n");
-    f.write("#Graphlet Posteriors:\n")
-    temp = T[i].posteriors;
-    f.write( str(len(temp)) + "\n" );
-    for k in range(0,len(temp)):
-        for j in range(0,len(temp[k][0])):
-            f.write(str(temp[k][0][j]) + " ");
-        f.write(str(temp[k][1])+"\n");
-    f.write("}\n");
-
-f.close();
+     
+     
+def init_list_of_objects(size):
+    list_of_objects = list()
+    for i in range(0,size):
+        list_of_objects.append( list() ) #different object reference each time
+    return list_of_objects    
+    
+T = graphlet_track(3);
+#f = open("graphlets.txt","w");
+#for i in range(0,len(T)):
+#    f.write("{ \n");
+#    f.write("#Graphlet ID:\n")
+#    f.write(str(T[i].id)+"\n");
+#    f.write("#Graphlet Number of node:\n")
+#    f.write(str(T[i].num_node)+"\n");
+#    f.write("#Graphlet Orbit:\n")
+#    temp = T[i].orbit;
+#    for j in temp:
+#        f.write(str(int(j))+ " ");
+#    f.write("\n");    
+#    f.write("#Graphlet Adjacency Matrix:\n")
+#    temp = T[i].adj;
+#    f.write(str(len(temp))+" " +str(len(temp[0]))+"\n");
+#    for k in range(0,len(temp)):
+#        for j in range(0,len(temp[k])):
+#            f.write(str(temp[k][j]) + " ");
+#        f.write("\n");
+#    f.write("#Graphlet Posteriors:\n")
+#    temp = T[i].posteriors;
+#    f.write( str(len(temp)) + "\n" );
+#    for k in range(0,len(temp)):
+#        for j in range(0,len(temp[k][0])):
+#            f.write(str(temp[k][0][j]) + " ");
+#        f.write(str(temp[k][1])+"\n");
+#    f.write("}\n");
+#
+#f.close();

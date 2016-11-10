@@ -59,6 +59,7 @@ def draw_graph_from_adj(A,orb,orbit_counter,dist=5):
     nodes = [(-r,0)];
     current_node = nodes[0];
     c = math.cos(theta); s = math.sin(theta);
+    bbox_props = dict(boxstyle="square", fc="none", ec="none", lw=2)
     for i in range(1,n):
         x = c*current_node[0] + s*current_node[1];         
         y = c*current_node[1] - s*current_node[0];
@@ -94,7 +95,8 @@ def draw_graph_from_adj(A,orb,orbit_counter,dist=5):
             yi = nodes[i][1]; yj = nodes[j][1];
             nv = math.sqrt((xi-xj)**2 + (yi-yj)**2); 
             vx = radius*(xi-xj)/nv; vy = radius*(yi-yj)/nv;
-            
+            ang = np.sign(yj-yi) * 180*np.arccos((xj-xi)/nv)/np.pi;
+            ff = - np.sign(yj-yi) * 0.05;
             
             if (temp == 2):
                 pad = 0.1;
@@ -111,7 +113,7 @@ def draw_graph_from_adj(A,orb,orbit_counter,dist=5):
                             xytext=(xi-vx,yi-vy), textcoords='data',
                             arrowprops=dict(arrowstyle="->",
                             connectionstyle="arc3"),
-                            )
+                            );
                             
             elif (temp == -1):
                 ax.annotate("",
@@ -119,7 +121,51 @@ def draw_graph_from_adj(A,orb,orbit_counter,dist=5):
                             xytext=(xj+vx,yj+vy), textcoords='data',
                             arrowprops=dict(arrowstyle="->",
                             connectionstyle="arc3"),
-                            )       
+                            );     
+                
+            elif (temp == 3):
+                ax.annotate("",
+                            xy=(xj+vx,yj+vy), xycoords='data',
+                            xytext=(xi-vx,yi-vy), textcoords='data',
+                            arrowprops=dict(arrowstyle="->",
+                            connectionstyle="arc3"),
+                            );
+                ax.text(xj + (xi-xj)/2 - ff*(yi-yj), yj + (yi-yj)/2 + ff*(xi-xj), "+", ha="center", va="center", rotation=ang,
+                            size=15,
+                            bbox=bbox_props);
+                            
+            elif (temp == -3):
+                ax.annotate("",
+                            xy=(xi-vx,yi-vy), xycoords='data',
+                            xytext=(xj+vx,yj+vy), textcoords='data',
+                            arrowprops=dict(arrowstyle="->",
+                            connectionstyle="arc3"),
+                            );
+                ax.text(xj + (xi-xj)/2 - ff*(yi-yj), yj + (yi-yj)/2 + ff*(xi-xj), "+", ha="center", va="center", rotation=ang,
+                            size=15,
+                            bbox=bbox_props);       
+                
+            elif (temp == 4):
+                ax.annotate("",
+                            xy=(xj+vx,yj+vy), xycoords='data',
+                            xytext=(xi-vx,yi-vy), textcoords='data',
+                            arrowprops=dict(arrowstyle="->",
+                            connectionstyle="arc3"),
+                            );
+                ax.text(xj + (xi-xj)/2 - ff*(yi-yj), yj + (yi-yj)/2 + ff*(xi-xj), "-", ha="center", va="center", rotation=ang,
+                            size=15,
+                            bbox=bbox_props);
+                            
+            elif (temp == -4):
+                ax.annotate("",
+                            xy=(xi-vx,yi-vy), xycoords='data',
+                            xytext=(xj+vx,yj+vy), textcoords='data',
+                            arrowprops=dict(arrowstyle="->",
+                            connectionstyle="arc3"),
+                            );
+                ax.text(xj + (xi-xj)/2 - ff*(yi-yj), yj + (yi-yj)/2 + ff*(xi-xj), "-", ha="center", va="center", rotation=ang,
+                            size=15,
+                            bbox=bbox_props);         
         
 
     plt.axis('scaled')

@@ -20,13 +20,15 @@ def generate_graphlets(n, gtype = 'undirected'):
         x = [-1, 0, 1];
     elif ( gtype == 'mixed' ):
         x = [-1, 0, 1, 2];
+    elif ( gtype == 'labeled mixed' ):
+        x = [-3,-1, 0, 1, 2,3];
     else:
         raise NameError("The type of graphlet should be 'undirected', 'directed', or 'mixed'.");
     
     adj = []; orb = [];
     # List holding the (n-1)-nodes graphlet(s) and connections used to generate
     # the corresponding n-nodes graphlet in adj    
-    origin = [];
+    origin = []; 
      
     if (n == 2):
         # Base case for 2-nodes graphlets
@@ -43,7 +45,15 @@ def generate_graphlets(n, gtype = 'undirected'):
         elif (x == [0,2]):
             adj.append(np.array([[0, 2],[2,0]]));
             orb.append([set([0,1])]);
-            graphlets = [[adj,orb,[]]];            
+            graphlets = [[adj,orb,[]]]; 
+        elif (x == [-4,-3, 0, 2, 3,4]):
+            adj.append(np.array([[0, 2],[2,0]]));
+            adj.append(np.array([[0, 3],[-3,0]]));
+            adj.append(np.array([[0, 4],[-4,0]]));
+            orb.append([set([0,1])]);
+            orb.append([set([0]),set([1])]);
+            orb.append([set([0]),set([1])]);
+            graphlets = [[adj,orb,[]]];             
     else:
         # General case for n-nodes graphlets
         graphlets = generate_graphlets(n-1,gtype);
@@ -70,6 +80,8 @@ def form_matrix(M,r):
      based on vector r and Matrix M"""
     c = np.copy(r); 
     c[r == 1] = -1; c[r == -1] = 1;
+    c[r == 3] = -3; c[r == -3] = 3;
+    c[r == 4] = -4; c[r == -4] = 4;
     M = np.concatenate((c.T,M),axis=1);
     return np.concatenate((np.insert(r,0,0,axis=1),M),axis=0);
     
