@@ -19,7 +19,7 @@ def draw_graphlets(graphlets,name):
     # name       - name of the pdf file where the graphlet figure are to be saved
     
     n = len(graphlets); 
-    orbit_counter = 1; # To numerote orbits in the representation
+    orbit_counter = 0; # To numerote orbits in the representation
     #   Open pdf page
     pdf = matplotlib.backends.backend_pdf.PdfPages(name+".pdf")
       

@@ -21,7 +21,7 @@ def generate_graphlets(n, gtype = 'undirected'):
     elif ( gtype == 'mixed' ):
         x = [-1, 0, 1, 2];
     elif ( gtype == 'labeled mixed' ):
-        x = [-3,-1, 0, 1, 2,3];
+        x = [-4,-3, 0, 2, 3, 4];
     else:
         raise NameError("The type of graphlet should be 'undirected', 'directed', or 'mixed'.");
     
@@ -46,7 +46,7 @@ def generate_graphlets(n, gtype = 'undirected'):
             adj.append(np.array([[0, 2],[2,0]]));
             orb.append([set([0,1])]);
             graphlets = [[adj,orb,[]]]; 
-        elif (x == [-4,-3, 0, 2, 3,4]):
+        elif (x == [-4,-3, 0, 2, 3, 4]):
             adj.append(np.array([[0, 2],[2,0]]));
             adj.append(np.array([[0, 3],[-3,0]]));
             adj.append(np.array([[0, 4],[-4,0]]));
